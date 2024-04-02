@@ -27,4 +27,4 @@ Run it providing a clip url as a parameter:
 
 ## Requirements
 
-**wget**, **brave-browser** 
+**wget**, **Brave Browser**, **Google Chrome**

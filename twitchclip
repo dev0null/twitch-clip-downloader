@@ -1,0 +1,110 @@
+#!/bin/bash
+VIDEO_DIR="$HOME/Videos/twitch-clips"
+SRC_DIR="$VIDEO_DIR/src"
+if [ ! -d "$VIDEO_DIR" ]; then
+	mkdir -p $VIDEO_DIR
+fi
+if [ ! -d "$SRC_DIR" ]; then
+	mkdir $SRC_DIR
+fi
+cd $VIDEO_DIR
+
+# tested browsers
+declare -a BROWSERS=('brave-browser' 'google-chrome')
+
+help() {
+	cat <<EOF
+## Twitch Clip Downloader ##
+Usage:		$(basename $0) [url]
+--help		Show this help message
+EOF
+}
+# $# -eq to number of arguments ex. npm install package - install is $1, package is $2 hence $# -eq to 2
+if [ $# -ne 1 ]; then
+	help;
+	exit -1;
+fi
+
+case $1 in
+	--help)
+	help;
+	exit -1;
+	;;
+esac
+SRC_URL=$1;
+
+# channelName: cat $PAGE_SRC | grep -Po 'figure aria-label=\K[^ ]+' | tail -n 1
+
+function downloadClip(){
+	wget -q -nc -O "$VIDEO_DIR/clip_$SRC_URL_ID.mp4" "$URL"
+	echo -e "Clip Downloaded: $VIDEO_DIR/clip_$SRC_URL_ID.mp4"
+}
+function get_bulk_URL(){
+	URL=$(cat $SRC_DIR/$PAGE_SRC | grep -Po 'webkit-playsinline="" src=\K[^ ]+' | cut -d\> -f 1 | sed 's/&amp;/\&/g ; s/"//g');
+	if [ ! -z $URL ]; then echo "URL: OK"; fi
+	downloadClip;
+}
+
+function sourceDownload(){
+	# downloading page structure
+	echo "Downloading page structure..."
+	# Select browser
+	for browser in ${BROWSERS[@]};
+	do
+		if [[ $(which $browser) ]]; then
+			declare -a selected=$(which $browser)
+			break
+		fi
+	done
+	unset BROWSERS
+
+	if [[ $selected ]]; then
+		echo -e "Browser selected: ${selected[0]}. \nDownloading clip..."
+		${selected[0]} --headless --virtual-time-budget=10000 --user-agent="Mozilla/5.0 (X11; Linux x86_64)" \
+			--timeout=10000 --run-all-compositor-stages-before-draw --disable-gpu \
+			--dump-dom $SRC_URL > $SRC_DIR/$PAGE_SRC 2>/dev/null
+	fi
+	unset selected
+	get_bulk_URL;
+}
+function isSrcDownloaded(){
+	# check if source page already exists
+	if [[ -f "$SRC_DIR/$PAGE_SRC" ]];then
+		echo "Using existing page source: $PAGE_SRC"
+		get_bulk_URL;
+	else
+		sourceDownload;
+	fi
+}
+function create_normalURL(){
+	# Create random name
+	SRC_URL_ID=$(echo $SRC_URL | cut -d/ -f 6 | rev | cut -d\- -f 1 | tail -c 6 | sed 's/[a-z]/\U&/g')
+	# index composited file name
+	PAGE_SRC="index-$SRC_URL_ID.html"
+	isSrcDownloaded;
+}
+function create_shortURL(){
+	
+	SRC_URL_ID=$(echo $SRC_URL | cut -d/ -f 4 | rev | cut -d\- -f 1 | tail -c 6 | sed 's/[a-z]/\U&/g')
+	# generated part to append to index*.html file
+	PAGE_SRC="index$SRC_URL_ID.html"
+	isSrcDownloaded;
+}
+function getUrlLength(){
+	URL_length=$(expr length $SRC_URL);
+}
+# control type of URL "clips.twitch.tv/" or "$channelname/clip/$clipname"
+function _init_(){
+	
+	tmp=$(getUrlLength);
+	if [[ "$tmp" -lt 75 ]]; then
+		echo -e "Issued shortLink...\n"
+		create_shortURL
+	else
+		echo -e "Issued normalLink...\n"
+		create_normalURL
+	fi
+	
+	#echo $SRC_URL_ID
+}
+_init_;

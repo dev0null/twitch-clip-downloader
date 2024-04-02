@@ -39,7 +39,7 @@ function downloadClip(){
 	echo -e "Clip Downloaded: $VIDEO_DIR/clip_$SRC_URL_ID.mp4"
 }
 function get_bulk_URL(){
-	URL=$(cat $SRC_DIR/$PAGE_SRC | grep -Po 'webkit-playsinline="" src=\K[^ ]+' | cut -d\> -f 1 | sed 's/&amp;/\&/g ; s/"//g');
+	URL=$(cat "$SRC_DIR/$PAGE_SRC" | grep -Po 'webkit-playsinline="" src=\K[^ ]+' | cut -d\> -f 1 | sed 's/&amp;/\&/g ; s/"//g');
 	if [ ! -z $URL ]; then echo "URL: OK"; fi
 	downloadClip;
 }
@@ -68,6 +68,7 @@ function sourceDownload(){
 }
 function isSrcDownloaded(){
 	# check if source page already exists
+	echo "src: $SRC_DIR/$PAGE_SRC"
 	if [[ -f "$SRC_DIR/$PAGE_SRC" ]];then
 		echo "Using existing page source: $PAGE_SRC"
 		get_bulk_URL;
@@ -90,20 +91,17 @@ function create_shortURL(){
 	isSrcDownloaded;
 }
 function getUrlLength(){
-	URL_length=$(expr length $SRC_URL);
+	URL_length=$(expr length "$SRC_URL");
 }
 # control URL type: "clips.twitch.tv/" or "$channelname/clip/$clipname"
 function _init_(){
-	
-	tmp=$(getUrlLength);
-	if [[ "$tmp" -lt 75 ]]; then
+	getUrlLength
+	if [[ "$URL_length" -lt 75 ]]; then
 		echo -e "Issued shortLink...\n"
 		create_shortURL
 	else
 		echo -e "Issued normalLink...\n"
 		create_normalURL
 	fi
-	
-	#echo $SRC_URL_ID
 }
 _init_;

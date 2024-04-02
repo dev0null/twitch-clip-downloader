@@ -68,7 +68,6 @@ function sourceDownload(){
 }
 function isSrcDownloaded(){
 	# check if source page already exists
-	echo "src: $SRC_DIR/$PAGE_SRC"
 	if [[ -f "$SRC_DIR/$PAGE_SRC" ]];then
 		echo "Using existing page source: $PAGE_SRC"
 		get_bulk_URL;
@@ -97,10 +96,8 @@ function getUrlLength(){
 function _init_(){
 	getUrlLength
 	if [[ "$URL_length" -lt 75 ]]; then
-		echo -e "Issued shortLink...\n"
 		create_shortURL
 	else
-		echo -e "Issued normalLink...\n"
 		create_normalURL
 	fi
 }

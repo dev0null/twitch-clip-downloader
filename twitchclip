@@ -19,7 +19,7 @@ Usage:		$(basename $0) [url]
 --help		Show this help message
 EOF
 }
-# $# -eq to number of arguments ex. npm install package - install is $1, package is $2 hence $# -eq to 2
+
 if [ $# -ne 1 ]; then
 	help;
 	exit -1;
@@ -33,7 +33,6 @@ case $1 in
 esac
 SRC_URL=$1;
 
-# channelName: cat $PAGE_SRC | grep -Po 'figure aria-label=\K[^ ]+' | tail -n 1
 
 function downloadClip(){
 	wget -q -nc -O "$VIDEO_DIR/clip_$SRC_URL_ID.mp4" "$URL"
@@ -93,7 +92,7 @@ function create_shortURL(){
 function getUrlLength(){
 	URL_length=$(expr length $SRC_URL);
 }
-# control type of URL "clips.twitch.tv/" or "$channelname/clip/$clipname"
+# control URL type: "clips.twitch.tv/" or "$channelname/clip/$clipname"
 function _init_(){
 	
 	tmp=$(getUrlLength);

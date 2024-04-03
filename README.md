@@ -20,6 +20,6 @@ Run it providing a clip url as a parameter:
 
 ## Requirements
 
-**wget**,
+- **wget**
 
-**Brave Browser** or **Google Chrome**
+- **Brave Browser** or **Google Chrome**

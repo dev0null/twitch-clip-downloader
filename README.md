@@ -22,4 +22,4 @@ Run it providing a clip url as a parameter:
 
 - **wget**
 
-- **Brave Browser** or **Google Chrome**
+- **Brave Browser**, **Google Chrome** or **Chromium**

@@ -19,7 +19,7 @@ Usage:		$(basename $0) [url]
 --help		Show this help message
 EOF
 }
-
+# Forces number of parameters to 1
 if [ $# -ne 1 ]; then
 	help;
 	exit -1;
@@ -35,6 +35,7 @@ SRC_URL=$1;
 
 
 function downloadClip(){
+	echo "Downloading clip..."
 	wget -q -nc -O "$VIDEO_DIR/clip_$SRC_URL_ID.mp4" "$URL"
 	echo -e "Clip Downloaded: $VIDEO_DIR/clip_$SRC_URL_ID.mp4"
 }
@@ -43,9 +44,8 @@ function get_bulk_URL(){
 	if [ ! -z $URL ]; then echo "URL: OK"; fi
 	downloadClip;
 }
-
+# dumping dom 
 function sourceDownload(){
-	# downloading page structure
 	echo "Downloading page structure..."
 	# Select browser
 	for browser in ${BROWSERS[@]};
@@ -58,16 +58,16 @@ function sourceDownload(){
 	unset BROWSERS
 
 	if [[ $selected ]]; then
-		echo -e "Browser selected: ${selected[0]}. \nDownloading clip..."
+		echo -e "Browser selected: ${selected[0]}."
 		${selected[0]} --headless --virtual-time-budget=10000 --user-agent="Mozilla/5.0 (X11; Linux x86_64)" \
-			--timeout=10000 --run-all-compositor-stages-before-draw --disable-gpu \
+			--disable-gpu \
 			--dump-dom $SRC_URL > $SRC_DIR/$PAGE_SRC 2>/dev/null
 	fi
 	unset selected
 	get_bulk_URL;
 }
+# check if source page already exists
 function isSrcDownloaded(){
-	# check if source page already exists
 	if [[ -f "$SRC_DIR/$PAGE_SRC" ]];then
 		echo "Using existing page source: $PAGE_SRC"
 		get_bulk_URL;
@@ -92,7 +92,7 @@ function create_shortURL(){
 function getUrlLength(){
 	URL_length=$(expr length "$SRC_URL");
 }
-# control URL type: "clips.twitch.tv/" or "$channelname/clip/$clipname"
+# control URL type: "clips.twitch.tv/" or "$channelname/clip/$clipurl"
 function _init_(){
 	getUrlLength
 	if [[ "$URL_length" -lt 75 ]]; then

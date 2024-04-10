@@ -10,7 +10,7 @@ fi
 cd $VIDEO_DIR
 
 # tested browsers
-declare -a BROWSERS=('brave-browser' 'google-chrome')
+declare -a BROWSERS=('chromium' 'brave-browser' 'google-chrome')
 
 help() {
 	cat <<EOF
